@@ -1,0 +1,10 @@
+name = "cardo-capital"
+main = "workers/index.js"
+compatibility_date = "2026-03-10"
+
+kv_namespaces = [
+  { binding = "USERS_KV", id = "YOUR_USERS_KV_ID" },
+  { binding = "SETTINGS_KV", id = "YOUR_SETTINGS_KV_ID" }
+]
+
+vars = { ADMIN_KEY = "supersecretadminkey" }
