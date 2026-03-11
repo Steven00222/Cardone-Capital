@@ -1,33 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Cardo Capital - Login/Register</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<h1>Cardo Capital</h1>
-
-<div id="auth">
-  <h2>Login</h2>
-  <input type="email" id="login-email" placeholder="Email">
-  <input type="password" id="login-password" placeholder="Password">
-  <button onclick="login()">Login</button>
-
-  <h2>Register</h2>
-  <input type="email" id="register-email" placeholder="Email">
-  <input type="password" id="register-password" placeholder="Password">
-  <button onclick="register()">Register</button>
-</div>
-
-<script>
 async function login() {
   const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
-  const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password})});
+  
+  const res = await fetch(`${WORKER_URL}/api/login`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email,password})
+  });
+
   if(res.ok){
     sessionStorage.setItem('user', email);
-    window.location.href = '/dashboard.html';
+    window.location.href = 'dashboard.html';
   } else {
     alert(await res.text());
   }
@@ -36,13 +19,16 @@ async function login() {
 async function register() {
   const email = document.getElementById('register-email').value;
   const password = document.getElementById('register-password').value;
-  const res = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password})});
+  
+  const res = await fetch(`${WORKER_URL}/api/register`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email,password})
+  });
+
   if(res.ok){
     alert('Registered! You can now login.');
   } else {
     alert(await res.text());
   }
 }
-</script>
-</body>
-</html>
