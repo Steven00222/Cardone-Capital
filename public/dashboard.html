@@ -1,116 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Cardo Capital Dashboard</title>
-<link rel="stylesheet" href="style.css">
-<script src="qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-  body { background:#121212; color:#fff; font-family:Arial,sans-serif; padding:20px; }
-  h1,h2 { color: lime; }
-  .wallet { margin: 10px 0; }
-  .wallet span { display:inline-block; width:100px; }
-  .qrcode { display:inline-block; margin-left:20px; }
-  #notes { background:#1a1a1a; padding:10px; margin:20px 0; border-radius:5px; }
-  #chartContainer { width:100%; max-width:600px; margin-top:30px; }
-</style>
-</head>
-<body>
-
-<h1>Cardo Capital Dashboard</h1>
-<div id="datetime"></div>
-
-<h2>Balances</h2>
-<div id="balances"></div>
-
-<h2>Wallets</h2>
-<div id="wallets"></div>
-
-<h2>Notes / Instructions</h2>
-<div id="notes"></div>
-
-<h2>Investment Graph (Today)</h2>
-<div id="chartContainer">
-  <canvas id="investmentChart"></canvas>
-</div>
-
-<script>
-const userEmail = sessionStorage.getItem('user');
-if(!userEmail) { alert('Not logged in'); window.location.href='index.html'; }
-
 async function fetchUser() {
-  const res = await fetch(`/api/login`, {
+  const password = prompt('Enter your password again for session');
+  const res = await fetch(`${WORKER_URL}/api/login`, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ email:userEmail, password:prompt('Enter your password again for session') })
+    body: JSON.stringify({email:userEmail, password})
   });
   if(!res.ok){ alert(await res.text()); return; }
   return await res.json();
 }
 
 async function fetchNotes() {
-  const res = await fetch(`/api/admin?admin=supersecretadminkey`);
+  const res = await fetch(`${WORKER_URL}/api/admin?admin=supersecretadminkey`);
   if(!res.ok) return 'No notes';
   const data = await res.json();
   return data.notes || 'No notes';
 }
-
-function updateDateTime() {
-  document.getElementById('datetime').innerText = new Date().toLocaleString();
-}
-setInterval(updateDateTime, 1000);
-updateDateTime();
-
-function displayBalances(balances){
-  const container = document.getElementById('balances');
-  container.innerHTML = '';
-  for(const [k,v] of Object.entries(balances)){
-    const div = document.createElement('div');
-    div.textContent = `${k}: ${v}`;
-    container.appendChild(div);
-  }
-}
-
-function displayWallets(wallets){
-  const container = document.getElementById('wallets');
-  container.innerHTML='';
-  for(const [k,v] of Object.entries(wallets)){
-    const div = document.createElement('div');
-    div.className='wallet';
-    div.innerHTML=`<span>${k}:</span> ${v} <span class="qrcode" id="qr-${k}"></span>`;
-    container.appendChild(div);
-    if(v) new QRCode(document.getElementById(`qr-${k}`), { text:v, width:64, height:64 });
-  }
-}
-
-async function initDashboard(){
-  const user = await fetchUser();
-  if(!user) return;
-  displayBalances(user.balances);
-  displayWallets(user.wallets);
-  document.getElementById('notes').innerText = await fetchNotes();
-
-  // Investment graph (example data)
-  const ctx = document.getElementById('investmentChart').getContext('2d');
-  const chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: Array.from({length:24},(_,i)=>`${i}:00`),
-      datasets:[{
-        label: 'Investment Value ($)',
-        data: Array.from({length:24},()=>Math.floor(Math.random()*1000 + 1000)),
-        borderColor: 'lime',
-        backgroundColor:'rgba(0,255,0,0.2)',
-        fill:true
-      }]
-    },
-    options:{ responsive:true, scales:{ y:{ beginAtZero:true } } }
-  });
-}
-
-initDashboard();
-</script>
-
-</body>
-</html>
